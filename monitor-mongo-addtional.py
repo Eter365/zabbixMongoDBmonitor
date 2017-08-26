@@ -101,7 +101,7 @@ def getServerStatus(client):
 
 def getReplSetStatus(client):
     try:
-        client.admin.command("")
+        info = client.admin.command("replSetGetStatus")
         return(info)
     except Exception as err:
         print("[error]: {}".format(err.message))
