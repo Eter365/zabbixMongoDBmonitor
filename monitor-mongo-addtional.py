@@ -238,7 +238,7 @@ def getReplRole(info, host):
     try:
         for i in info.get('members'):
             if i.get('name').split(':')[0] == host:
-                return i.get('stateStr')
+                return i.get('state')
     except Exception as err:
         print("[error]: {}".format(err.message))
         return(-1)
