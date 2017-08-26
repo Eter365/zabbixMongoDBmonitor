@@ -59,6 +59,13 @@ def zabbixSenderData(zabbix_sender, zabbix_server, hostname, key_name, key_value
         print("[error]: {}".format(err.message))
         return(-1)
 
+def sendDataToMongo(conn, hostname, keyName, keyValue):
+    try:
+        client = conn
+
+    except Exception as err:
+        print("[error]: {}".format(err.message))
+
 def tojson(data):
     try:
         jdata = dumps(data, sort_keys=True, indent=2)
@@ -93,7 +100,7 @@ def mongoNoAuthConn(host, port, replset):
 
 def getServerStatus(client):
     try:
-        info   = client.admin.command("serverStatus")
+        info = client.admin.command("serverStatus")
         return(info)
 
     except Exception as err:
@@ -227,6 +234,15 @@ def aliveCheck(info):
         values['aliveCheck'] = 0
         return(values)
 
+def getReplRole(info, host):
+    try:
+        for i in info.get('members'):
+            if i.get('name').split(':')[0] == host:
+                return i.get('stateStr')
+    except Exception as err:
+        print("[error]: {}".format(err.message))
+        return(-1)
+
 def getMonitorVariables(info, item, mItems):
     try:
         values   = {}
@@ -308,6 +324,7 @@ if __name__ == '__main__':
         cf=ConfigParser.ConfigParser()
         cf.read(ops.configFile)
         has_default=cf.has_section('default')
+      
 
         if has_default:
             ZabbixServer=cf.get('default','ZabbixServer')
@@ -335,12 +352,14 @@ if __name__ == '__main__':
                 try:
                     conn=mongoNoAuthConn(mongoServer, mongoPort, mongoReplSet)
                     info = getServerStatus(conn)
+                    rsinfo = getReplSetStatus(conn)
                 except Exception as err:
                     break
             else:
                 try:
                     conn=mongoConn(mongoServer, mongoPort, mongoReplSet)
                     info = getServerStatus(conn)
+                    rsinfo = getReplSetStatus(conn)
                 except Exception as err:
                     break
 
@@ -351,6 +370,11 @@ if __name__ == '__main__':
                     ret=zabbixSenderData(zabbixSender, ZabbixServer, hostName, k, v)
                 else:
                     ret=zabbixSenderData(zabbixSender, ZabbixServer, hostName, k, v)
+            try:
+                mongoRole = getReplRole(rsinfo, mongoServer)
+                ret = zabbixSenderData(zabbixSender, ZabbixServer, hostName, 'mongoRole', mongoRole)
+            except Exception as err:
+                print("[error]: {}".format(err.message))
 
             monitorVariables = {}
             items = parameterItems()
@@ -371,4 +395,3 @@ if __name__ == '__main__':
     except Exception as err:
         print("[error]: {}".format(err.message))
         exit(1)
-
