@@ -46,7 +46,7 @@ def zabbixSenderData(zabbix_sender, zabbix_server, hostname, key_name, key_value
 if __name__ == '__main__':
 	IPLIST = ['10.0.0.16', '10.0.0.209', '10.0.0.205']
 	for ip in IPLIST:
-		client = mongoConn(ip, 7132, 7132)
+		client = mongoConn(ip, 7332, 7332)
 		info = getReplSetStatus(client)
 		role = getReplRole(info, ip)
 		print("IPaddr: {} Role: {}".format(ip, role))
