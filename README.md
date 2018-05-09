@@ -1,7 +1,7 @@
 # zabbixMongoDBmonitor
 zabbix MongoDB addtional monitor
 
-./etc/FromDualagent_58_Mongo_01.conf 
+./etc/FromDualagent_Eter_Mongo_01.conf 
 ``` SQL
 [mds_7332_127.0.0.1]
 Type         = mysqld
